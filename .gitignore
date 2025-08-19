@@ -1,0 +1,16 @@
+# Binaries
+*.exe
+*.out
+*.test
+
+# Go build cache
+/go.sum
+*.log
+
+# Redis dump
+dump.rdb
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.swp

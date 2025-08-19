@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "api/gen";
+
+// Request message
+message LookupRequest {
+  string short_url = 1;
+}
+
+// Response message
+message LookupResponse {
+  string long_url = 1;
+  string short_url = 2;
+}
+
+// Service definition
+service RedirectionService {
+  rpc LookupURL(LookupRequest) returns (LookupResponse);
+}
+
+// Run this from project root to generate the go files
+// protoc --go_out=. --go-grpc_out=. api/proto/redirection.proto
