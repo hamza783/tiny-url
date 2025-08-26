@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net"
+	"os"
 
 	"github.com/hamza4253/tiny-url/redirect/internal/handler"
 	"github.com/hamza4253/tiny-url/redirect/internal/repository"
@@ -12,8 +13,8 @@ import (
 )
 
 var (
-	grpcAddr  = ":9000"
-	redisAddr = "localhost:6379"
+	grpcAddr  = getEnv("REDIRECTION_SERVICE_ADDR", ":9000")
+	redisAddr = getEnv("REDIS_URL", "localhost:6379")
 )
 
 func main() {
@@ -39,4 +40,12 @@ func main() {
 	if err := grpcServer.Serve(l); err != nil {
 		log.Fatalf("Failed to start gRPC server. Error: %v", err)
 	}
+}
+
+// helper function to read env with fallback
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }

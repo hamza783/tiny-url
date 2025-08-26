@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/hamza4253/tiny-url/shortener/internal/handler"
 	"github.com/hamza4253/tiny-url/shortener/internal/repository"
@@ -11,8 +12,8 @@ import (
 )
 
 var (
-	httpAddr  = ":8081"
-	redisAddr = "localhost:6379"
+	httpAddr  = getEnv("SHORTENING_SERVICE_ADDR", ":8081")
+	redisAddr = getEnv("REDIS_URL", "localhost:6379")
 )
 
 func main() {
@@ -35,4 +36,12 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start the server: %v", err)
 	}
+}
+
+// helper function to read env with fallback
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }

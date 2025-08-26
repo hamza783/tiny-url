@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	handler "github.com/hamza4253/tiny-url/gateway/internal/handlers"
 	shorten "github.com/hamza4253/tiny-url/gateway/internal/services"
@@ -12,15 +13,20 @@ import (
 )
 
 var (
-	httpAddr                 = ":8080"
-	urlShorteningServiceURL  = "http://localhost:8081"
-	urlRedirectionServiceURL = "localhost:9000"
+	httpAddr                 = getEnv("API_GATEWAY", ":8080")
+	urlShorteningServiceURL  = getEnv("URL_SHORTENING_URL", "http://localhost:8081")
+	urlRedirectionServiceURL = getEnv("URL_REDIRECTION_GRPC_ADDR", "localhost:9000")
 )
 
 func main() {
 	log.Println("Starting API Gateway: ", httpAddr)
+	log.Println("Starting urlShorteningServiceURL: ", urlShorteningServiceURL)
+	log.Println("Starting urlRedirectionServiceURL: ", urlRedirectionServiceURL)
 
-	conn, err := grpc.NewClient(urlRedirectionServiceURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		urlRedirectionServiceURL,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
 	if err != nil {
 		log.Fatalf("Failed to create a gRPC client: %v", err)
 	}
@@ -42,4 +48,12 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatalf("Failed to start the server: %v", err)
 	}
+}
+
+// helper function to read env with fallback
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }

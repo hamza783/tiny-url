@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      url-redirection:
+        condition: service_healthy
+      url-shortening:
+        condition: service_started
+    environment:
+      API_GATEWAY: ":8080"
+      URL_SHORTENING_URL: "http://url-shortening:8081"
+      URL_REDIRECTION_GRPC_ADDR: "url-redirection:9000"
+      REDIS_URL: "redis:6379"
+
+  url-shortening:
+    build:
+      context: .
+      dockerfile: url-shortening-service/Dockerfile
+    container_name: url-shortening
+    ports:
+      - "8081:8081"
+    environment:
+      SHORTENING_SERVICE_ADDR: ":8081"
+      REDIS_URL: "redis:6379"
+  
+  url-redirection:
+    build:
+      context: .
+      dockerfile: url-redirection-service/Dockerfile
+    container_name: url-redirection
+    ports:
+      - "9000:9000"
+    environment:
+      REDIRECTION_SERVICE_ADDR: ":9000"
+      REDIS_URL: "redis:6379"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9000"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+  
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
