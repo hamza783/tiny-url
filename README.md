@@ -1,14 +1,17 @@
 # tiny-url
 
 This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC to communicate to other microservices. The data is then saved in redis.
-This is a small project to learn about implementing microservices arcitecture. All the services are saved in 1 repo for easy management.
+This is a small project to learn about implementing microservices architecture. All the services are saved in 1 repo for easy management.
 
 
 ## Setup
+Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.
 
-Start each microservice in a different terminal. Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.
+### If using docker:
+This project uses docker to spin up all the microservices and redis. To start all the services, simply run this command: `docker compose up`
 
-### api-gateway
+### If not using docker, start individual services:
+#### api-gateway
 To start the api gateway server:
 ```bash
 go run api-gateway/cmd/main.go
@@ -16,28 +19,28 @@ go run api-gateway/cmd/main.go
 
 Uses port: 8080
 
-### url-shortening-service
+#### url-shortening-service
 To start the service: 
 ```bash
 go run url-shortening-service/cmd/main.go
 ```
 Uses port: 8081
 
-### url-redirection-service
+#### url-redirection-service
 To start the service:
 ```bash
 go run url-redirection-service/cmd/main.go
 ```
 Uses port: 9000
 
-### redis
+#### redis
 
 To start redis: 
 ```bash
 redis-server
 ```
 
-### shared
+#### shared
 Contains code that is shared between different services
 
 
