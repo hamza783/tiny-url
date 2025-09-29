@@ -5,12 +5,17 @@ This is a small project to learn about implementing microservices architecture. 
 
 
 ## Setup
-Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.
-
-### If using docker:
-This project uses docker to spin up all the microservices and redis. To start all the services, simply run this command: `docker compose up`
+### If using docker(Simplest):
+This project uses docker to spin up all the microservices, frontend app, and redis. To start all the services, simply run this command: `docker compose up`. Then navigate to "http://localhost:5173/"
 
 ### If not using docker, start individual services:
+Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.
+
+#### app
+To start the frontend app. Navigate to app directory.
+yarn install
+npm run dev
+
 #### api-gateway
 To start the api gateway server:
 ```bash

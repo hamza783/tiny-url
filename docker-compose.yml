@@ -1,10 +1,8 @@
-version: "3.9"
-
 services:
   api-gateway:
     build:
-      context: .
-      dockerfile: api-gateway/Dockerfile
+      context: ./api-gateway
+      dockerfile: Dockerfile
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -21,8 +19,8 @@ services:
 
   url-shortening:
     build:
-      context: .
-      dockerfile: url-shortening-service/Dockerfile
+      context: ./url-shortening-service
+      dockerfile: Dockerfile
     container_name: url-shortening
     ports:
       - "8081:8081"
@@ -32,8 +30,8 @@ services:
   
   url-redirection:
     build:
-      context: .
-      dockerfile: url-redirection-service/Dockerfile
+      context: ./url-redirection-service
+      dockerfile: Dockerfile
     container_name: url-redirection
     ports:
       - "9000:9000"
@@ -47,6 +45,20 @@ services:
       retries: 5
       start_period: 10s
   
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app
+    ports:
+      - "5173:5173" 
+    volumes:
+      - ./app:/app     # hot reload
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+    depends_on:
+      - api-gateway
+
   redis:
     image: redis:7-alpine
     container_name: redis

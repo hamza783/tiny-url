@@ -1,0 +1,7 @@
+#root {
+  width: 90%;
+  min-width: 400px;
+  max-width: none; /* or keep a site-wide cap if you want, e.g., 1280px */
+  margin: 0 auto;
+  padding: 0;
+}

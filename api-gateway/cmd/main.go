@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	handler "github.com/hamza4253/tiny-url/gateway/internal/handlers"
 	shorten "github.com/hamza4253/tiny-url/gateway/internal/services"
@@ -41,8 +42,11 @@ func main() {
 	h.RegisterRoutes(mux)
 
 	server := &http.Server{
-		Addr:    httpAddr,
-		Handler: mux,
+		Addr:         httpAddr,
+		Handler:      mux,
+		IdleTimeout:  120 * time.Second, // max time to wait for next request. used if multiple requests from same client
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	if err := server.ListenAndServe(); err != nil {

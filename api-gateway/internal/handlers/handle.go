@@ -13,7 +13,7 @@ import (
 
 type Handler struct {
 	shortenerClient *services.URLShortnerClient
-	client          pb.RedirectionServiceClient
+	client          pb.RedirectionServiceClient // this is redirection service client
 }
 
 func NewHandler(s *services.URLShortnerClient, c pb.RedirectionServiceClient) *Handler {
