@@ -12,9 +12,20 @@ This project uses docker to spin up all the microservices, frontend app, and red
 Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.
 
 #### app
-To start the frontend app. Navigate to app directory.
+To start the frontend app:
+
+Update proxy api target url in vite.config.js to "http://localhost:8080" 
+
+Navigate to app directory and make sure you are using the right node version(">=20.0.0") and run:
+
+```bash
 yarn install
+```
+```bash
 npm run dev
+```
+
+Navigate to "http://localhost:5173/"
 
 #### api-gateway
 To start the api gateway server:

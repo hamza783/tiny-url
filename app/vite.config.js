@@ -11,6 +11,8 @@ export default defineConfig({
       '/api': {
         // When running inside Docker, use the service name, not localhost
         target: 'http://api-gateway:8080',
+        // When not using Docker, use localhost
+        // target: 'http://localhost:8080',
         changeOrigin: true
       },
     },
