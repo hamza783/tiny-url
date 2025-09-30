@@ -3,6 +3,11 @@
 This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC to communicate to other microservices. The data is then saved in redis.
 This is a small project to learn about implementing microservices architecture. All the services are saved in 1 repo for easy management.
 
+## Demo
+
+### URL Shortening
+https://github.com/user-attachments/assets/007b4965-0a7c-482c-9b4a-2b3a4656d96f
+
 
 ## Setup
 ### If using docker(Simplest):
