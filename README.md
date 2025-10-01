@@ -5,8 +5,12 @@ This is a small project to learn about implementing microservices architecture. 
 
 ## Demo
 
-### URL Shortening
+### URL Shortening with single URL
 https://github.com/user-attachments/assets/007b4965-0a7c-482c-9b4a-2b3a4656d96f
+
+### URL Shortening with multiple URLs
+https://github.com/user-attachments/assets/d085a7e8-2cf5-4298-8fcb-bda311238cab
+
 
 
 ## Setup
