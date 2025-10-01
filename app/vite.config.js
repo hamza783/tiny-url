@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 5173,
+    watch: { usePolling: true, interval: 100 },
     proxy: {
       '/api': {
         // When running inside Docker, use the service name, not localhost

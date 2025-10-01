@@ -34,7 +34,7 @@ const UrlContainer = styled.div`
 const UrlInputContainer = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-end;
   width: 100%;
   padding: 0 8px;
   box-sizing: border-box; /* include padding in width calc */
@@ -72,7 +72,35 @@ const UrlInput = styled.input`
     margin-right: 0;      /* no horizontal gap in column layout */
     margin-bottom: 8px;   /* vertical gap above button */
   }
-`;
+`
+
+const URLTextArea = styled.textarea`
+  flex: 1 1 auto;   /* allow input to shrink and grow inside the container */
+  min-width: 0;     /* critical for flex children to shrink below content size */
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 16px;
+  line-height: 1.2;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 10px;
+  outline: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  margin-right: 8px;
+  height: 200px;
+
+  /* Remove UA outline on mouse focus; keep visible ring for keyboard */
+  &:focus { outline: none; }
+
+  &:focus-visible {
+    border-color: #f59e0b; /* amber-500 */
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.35);
+  }
+
+  @media (max-width: ${SM_VIEW}) {
+    margin-right: 0;      /* no horizontal gap in column layout */
+    margin-bottom: 8px;   /* vertical gap above button */
+  }
+`
 
 const ShortenBtn = styled.button`
   background: linear-gradient(135deg, #f59e0b, #ea580c); /* amber → orange */
@@ -175,18 +203,48 @@ const ResultLink = styled.p`
   }
 `
 
+const BatchLink = styled.a`
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  box-shadow: 0 6px 14px rgba(22,163,74,0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 20px rgba(22,163,74,0.35);
+    background: linear-gradient(135deg,rgb(25, 136, 66),rgb(17, 132, 59));
+  }
+
+  &:active {
+    transform: translateY(0);
+    background: linear-gradient(135deg,rgb(19, 107, 51),rgb(14, 111, 49));
+  }
+`
+
 const Home = () => {
   const [longUrl, setLongUrl] = useState('')
+  const [longUrls, setLongUrls] = useState('')
   const [shortCode, setShortCode] = useState('')
+  const [batchId, setBatchId] = useState('')
   const [error, setError] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [inputMode, setInputMode] = useState('single') // 'single' | 'list'
   const appUrl = window.location.origin
+
+  const buttonDisabled = (inputMode === 'single' && !longUrl) || (inputMode === 'list' && !longUrls)
 
   const handleShorten = async () => {
     if (!longUrl) return
 
     setError(null)
     setShortCode(null)
+    setBatchId(null)
     try {
       const res = await fetch(`/api/shorten`, {
         method: 'POST',
@@ -196,6 +254,34 @@ const Home = () => {
       const data = await res.json()
       const shortUrl = data?.data?.short_url
       setShortCode(shortUrl)
+    } catch (err) {
+      setError('Ops...Something went wrong.')
+      setShortCode(null)
+      console.error('Shorten request failed:', err)
+    } finally {
+      setLongUrl('')
+    }
+  }
+
+  const handleShortenAll = async () => {
+    if (!longUrls) return
+
+    setError(null)
+    setShortCode(null)
+    setBatchId(null)
+    try {
+      const longUrlsList = longUrls.split(',').map(url => url.trim()).filter(url => url.length > 0)
+      if (!longUrlsList) return
+
+      const res = await fetch(`/api/shorten/all`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ long_url_list: longUrlsList }),
+      })
+      const data = await res.json()
+      const batchId = data?.data?.batch_id
+      console.log('debug batchId: ', data)
+      setBatchId(batchId)
     } catch (err) {
       setError('Ops...Something went wrong.')
       setShortCode(null)
@@ -220,24 +306,64 @@ const Home = () => {
   return (
     <Container>
       <h1>Welcome to Short URL</h1>
-      <UrlContainer>
-        <h3>Shorten your long URL</h3>
-        <UrlInputContainer>
-          <UrlInput
-            type="url"
-            placeholder="Enter a long URL..."
-            value={longUrl}
-            onChange={(e) => setLongUrl(e.target.value)}
-            required
-          />
-          <ShortenBtn disabled={!longUrl} onClick={handleShorten}>Shorten URL</ShortenBtn>
-        </UrlInputContainer>
-      </UrlContainer>
-      {shortCode && (
+       <UrlContainer>
+         <h3>Shorten your long URL</h3>
+         {/* Input mode selector */}
+         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+             <input
+               type='radio'
+               name='inputMode'
+               value='single'
+               checked={inputMode === 'single'}
+               onChange={() => setInputMode('single')}
+             />
+             Single URL
+           </label>
+           <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+             <input
+               type='radio'
+               name='inputMode'
+               value='list'
+               checked={inputMode === 'list'}
+               onChange={() => setInputMode('list')}
+             />
+             Multiple Urls
+           </label>
+         </div>
+         <UrlInputContainer>
+           {inputMode === 'single' && (
+              <UrlInput
+              type="url"
+              placeholder="Enter a long URL..."
+              value={longUrl}
+              onChange={(e) => setLongUrl(e.target.value)}
+              required
+            />
+           )}
+          {inputMode === 'list' && (
+            <URLTextArea
+              type='text'
+              placeholder='Enter comma-separated URLs...'
+              value={longUrls}
+              onChange={(e) => setLongUrls(e.target.value)}
+              required
+            />
+          )}
+           <ShortenBtn disabled={buttonDisabled} onClick={() => {
+            if (inputMode === 'list') {
+              handleShortenAll()
+              return
+            }
+            handleShorten()
+           }}>{`Shorten URL${inputMode === 'list' ? 's' : ''}`}</ShortenBtn>
+         </UrlInputContainer>
+       </UrlContainer>
+      {shortCode && inputMode === 'single' && (
         <ResultCard>
           <ResultTitle>Here is your shortened URL</ResultTitle>
           <ResultLink
-            role="button"
+            role='button'
             tabIndex={0}
             onClick={handleCopyShortCode}
             onKeyDown={(e) => {
@@ -246,12 +372,20 @@ const Home = () => {
                 handleCopyShortCode()
               }
             }}
-            aria-label="Copy short code to clipboard"
-            title="Click to copy code"
+            aria-label='Copy short code to clipboard'
+            title='Click to copy code'
           >
             {`${appUrl}/${shortCode}`}
           </ResultLink>
           {copied && <p style={{ color: 'orange' }}>Copied to clipboard</p>}
+        </ResultCard>
+      )}
+      {batchId && inputMode === 'list' && (
+        <ResultCard>
+          <p>Generating short urls for you. Click the below link to see your results for job {batchId}</p>
+          <BatchLink href={`${appUrl}/shorts/${batchId}`}>
+          {`${appUrl}/shorts/${batchId}`}
+          </BatchLink>
         </ResultCard>
       )}
       {error && (

@@ -32,7 +32,7 @@ func (r *RedisRepository) SaveURLBatch(ctx context.Context, batchId, longUrl, sh
 	}
 
 	// set expire time so batch_id mapping doesn't stay forever
-	err = r.client.Expire(ctx, key, 5*time.Minute).Err()
+	err = r.client.Expire(ctx, key, 1*time.Hour).Err()
 	if err != nil {
 		log.Println("Error setting redis expire time", err)
 		return err
