@@ -23,6 +23,7 @@ func NewHandler(shortenService *shorten.ShortenService) *Handler {
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/urls/shorten", h.ShortenURL)
 	mux.HandleFunc("GET /api/urls/{short_url}", h.GetLongUrl)
+	mux.HandleFunc("GET /api/urls/all/{batch_id}", h.GetUrlsByBatchId)
 }
 
 // Calls ShortenURL service method and creates response for ShortenURL endpoint
@@ -69,5 +70,25 @@ func (h *Handler) GetLongUrl(w http.ResponseWriter, r *http.Request) {
 		Data: longUrl,
 	}
 
+	helpers.WriteResponse(w, response, http.StatusOK)
+}
+
+func (h *Handler) GetUrlsByBatchId(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	batchId := r.PathValue("batch_id")
+	// get long url
+	urlsMap, err := h.service.GetUrlsByBatchId(ctx, batchId)
+	if err != nil {
+		http.Error(w, "Error getting the long url", http.StatusInternalServerError)
+		return
+	}
+
+	// create a response object
+	urlResponse := models.URLResponse{
+		UrlsMap: urlsMap,
+	}
+	response := models.APIResponse{
+		Data: urlResponse,
+	}
 	helpers.WriteResponse(w, response, http.StatusOK)
 }

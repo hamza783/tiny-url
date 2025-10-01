@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/007b4965-0a7c-482c-9b4a-2b3a4656d96f
 
 ## Setup
 ### If using docker(Simplest):
-This project uses docker to spin up all the microservices, frontend app, and redis. To start all the services, simply run this command: `docker compose up`. Then navigate to "http://localhost:5173/"
+This project uses docker to spin up all the microservices, frontend app, and redis. To start all the services, simply run this command: `docker compose up --build`. Then navigate to "http://localhost:5173/"
 
 ### If not using docker, start individual services:
 Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.

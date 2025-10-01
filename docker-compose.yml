@@ -1,8 +1,8 @@
 services:
   api-gateway:
     build:
-      context: ./api-gateway
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -11,6 +11,8 @@ services:
         condition: service_healthy
       url-shortening:
         condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       API_GATEWAY: ":8080"
       URL_SHORTENING_URL: "http://url-shortening:8081"
@@ -19,19 +21,22 @@ services:
 
   url-shortening:
     build:
-      context: ./url-shortening-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: url-shortening-service/Dockerfile
     container_name: url-shortening
     ports:
       - "8081:8081"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
     environment:
       SHORTENING_SERVICE_ADDR: ":8081"
       REDIS_URL: "redis:6379"
   
   url-redirection:
     build:
-      context: ./url-redirection-service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: url-redirection-service/Dockerfile
     container_name: url-redirection
     ports:
       - "9000:9000"
@@ -64,3 +69,27 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+volumes:
+  rabbitmq_data:
+  redis_data:

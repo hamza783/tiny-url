@@ -6,6 +6,8 @@ replace github.com/hamza4253/tiny-url/shared => ../shared
 
 require (
 	github.com/hamza4253/tiny-url/shared v0.0.0-00010101000000-000000000000
+	github.com/matoous/go-nanoid/v2 v2.1.0
+	github.com/streadway/amqp v1.1.0
 	google.golang.org/grpc v1.75.0
 )
 

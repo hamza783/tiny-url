@@ -90,3 +90,32 @@ func (c *URLShortnerClient) LookupURL(ctx context.Context, shortUrl string) (str
 	fmt.Println("Long url ====>", response["data"])
 	return response["data"], nil
 }
+
+func (c *URLShortnerClient) FetchURLsByBatchId(ctx context.Context, batchId string) (map[string]string, error) {
+	url := fmt.Sprintf("%s/api/urls/all/%s", c.BaseURL, batchId)
+	// Create request
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	// Add Header
+	request.Header.Add("Content-Type", "application/json")
+
+	// Get Response
+	resp, err := c.httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("failed to get urls by batch id")
+	}
+
+	var response models.URLShoteningServiceResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	data := response.Data
+	return data.UrlMaps, nil
+}

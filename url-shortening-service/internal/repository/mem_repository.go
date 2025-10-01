@@ -23,6 +23,16 @@ func (r *MemRepository) SaveURL(ctx context.Context, shortUrl string, longUrl st
 	return nil
 }
 
+func (r *MemRepository) SaveURLBatch(ctx context.Context, batchId, longUrl, shortUrl string) error {
+	// TODO
+	return nil
+}
+
+func (r *MemRepository) GetURLByBatchId(ctx context.Context, batchId string) (map[string]string, error) {
+	// TODO
+	return nil, nil
+}
+
 // get long url give short url. just for testing
 func (r *MemRepository) GetURLByShortURL(ctx context.Context, shortUrl string) (string, error) {
 	fmt.Println("Getting long url for short url ====>", shortUrl)

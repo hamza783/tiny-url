@@ -7,6 +7,7 @@ toolchain go1.24.6
 require (
 	github.com/matoous/go-nanoid/v2 v2.1.0
 	github.com/redis/go-redis/v9 v9.12.1
+	github.com/streadway/amqp v1.1.0
 )
 
 require (

@@ -10,6 +10,7 @@ type APIResponse struct {
 }
 
 type URLResponse struct {
-	ShortUrl string `json:"short_url"`
-	LongUrl  string `json:"long_url"`
+	ShortUrl string            `json:"short_url"`
+	LongUrl  string            `json:"long_url"`
+	UrlsMap  map[string]string `json:"urls_map"`
 }

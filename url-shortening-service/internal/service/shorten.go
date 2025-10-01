@@ -42,6 +42,15 @@ func (s *ShortenService) GetFullURL(ctx context.Context, shortUrl string) (strin
 	return longUrl, nil
 }
 
+func (s *ShortenService) GetUrlsByBatchId(ctx context.Context, batchId string) (map[string]string, error) {
+	urlsMap, err := s.repo.GetURLByBatchId(ctx, batchId)
+	if err != nil {
+		log.Printf("Error generating urls for batch id: %v. Error: %v", batchId, err)
+		return nil, err
+	}
+	return urlsMap, nil
+}
+
 func createShortRandomUrl() (string, error) {
 	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
