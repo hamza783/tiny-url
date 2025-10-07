@@ -1,7 +1,7 @@
 # tiny-url
 
-This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC to communicate to other microservices. The data is then saved in redis.
-This is a small project to learn about implementing microservices architecture. All the services are saved in 1 repo for easy management.
+This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC/REST to communicate to other microservices. The data is then saved in postgres database. It also uses RabbitMQ and event driven design is used to generate short urls for multiple long urls.
+This is a small project to show implementation of microservices architecture. All the services are saved in 1 repo for easy management.
 
 ## Demo
 
@@ -15,7 +15,7 @@ https://github.com/user-attachments/assets/d085a7e8-2cf5-4298-8fcb-bda311238cab
 
 ## Setup
 ### If using docker(Simplest):
-This project uses docker to spin up all the microservices, frontend app, and redis. To start all the services, simply run this command: `docker compose up --build`. Then navigate to "http://localhost:5173/"
+This project uses docker to spin up all the microservices, frontend app, rabbitmq, and postgres. To start all the services, simply run this command: `docker compose up --build`. Then navigate to "http://localhost:5173/"
 
 ### If not using docker, start individual services:
 Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.

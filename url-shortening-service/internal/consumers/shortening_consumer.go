@@ -83,7 +83,7 @@ func (c *Consumer) Start(ctx context.Context) error {
 				log.Printf("failed to shorten URL %s: %v", longUrl, err)
 				continue
 			}
-			// save shortened url list to redis
+			// save shortened url with batchId
 			c.repo.SaveURLBatch(ctx, payload.BatchId, longUrl, shortUrl)
 			log.Println("done saving url batch")
 		}

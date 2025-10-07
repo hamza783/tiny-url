@@ -13,15 +13,16 @@ import (
 	"github.com/hamza4253/tiny-url/shortener/internal/handler"
 	"github.com/hamza4253/tiny-url/shortener/internal/repository"
 	shorten "github.com/hamza4253/tiny-url/shortener/internal/service"
-	"github.com/redis/go-redis/v9"
 	"github.com/streadway/amqp"
 )
 
+// TODO: Move everything to env
 var (
-	httpAddr   = getEnv("SHORTENING_SERVICE_ADDR", ":8081")
-	redisAddr  = getEnv("REDIS_URL", "localhost:6379")
-	QUEUE_NAME = "shorten_url_batch"
-	rabbitURL  = getEnv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+	httpAddr = getEnv("SHORTENING_SERVICE_ADDR", ":8081")
+	// redisAddr   = getEnv("REDIS_URL", "localhost:6379")
+	QUEUE_NAME  = "shorten_url_batch"
+	rabbitURL   = getEnv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+	postgresURL = getEnv("DATABASE_URL", "")
 )
 
 func main() {
@@ -31,14 +32,18 @@ func main() {
 	log.Println("Starting URL Shortening Service: ", httpAddr)
 	mux := http.NewServeMux()
 	// Create redis client
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: redisAddr,
-	})
+	// redisClient := redis.NewClient(&redis.Options{
+	// 	Addr: redisAddr,
+	// })
 
 	// Create DB
 	// memRepo := repository.NewMemRepository()
-	redisRepo := repository.NewRedisRepository(redisClient)
-	service := shorten.NewShortenService(redisRepo)
+	// redisRepo := repository.NewRedisRepository(redisClient)
+	postgresRepo, err := repository.NewDBClient(ctx, postgresURL)
+	failOnError("Failed to connect to rabbit mq", err)
+	defer postgresRepo.Close()
+
+	service := shorten.NewShortenService(postgresRepo)
 
 	// Create handler and register routes
 	h := handler.NewHandler(service)
@@ -50,7 +55,7 @@ func main() {
 	defer conn.Close()
 
 	// Create a consumer
-	consumer, err := consumers.NewConsumer(conn, service, redisRepo, QUEUE_NAME)
+	consumer, err := consumers.NewConsumer(conn, service, postgresRepo, QUEUE_NAME)
 	failOnError("Error setting up a RabbitMQ consumer", err)
 
 	// Start consumer

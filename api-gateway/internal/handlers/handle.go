@@ -80,7 +80,8 @@ func (h *Handler) ShortenURLs(w http.ResponseWriter, r *http.Request) {
 	longUrlList := reqBody.LongUrlList
 
 	for _, longUrl := range longUrlList {
-		h.publisher.Publish(ctx, batchId, longUrl)
+		url := strings.TrimSpace(longUrl)
+		h.publisher.Publish(ctx, batchId, url)
 	}
 
 	urlsResp := models.ShortenURLResponse{

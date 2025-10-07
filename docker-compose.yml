@@ -29,9 +29,12 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
     environment:
       SHORTENING_SERVICE_ADDR: ":8081"
       REDIS_URL: "redis:6379"
+      DATABASE_URL: "postgres://tinyurl:postgrespass@postgres:5432/tinyurl_db?sslmode=disable"
   
   url-redirection:
     build:
@@ -40,9 +43,13 @@ services:
     container_name: url-redirection
     ports:
       - "9000:9000"
+    depends_on:
+      postgres:
+        condition: service_healthy
     environment:
       REDIRECTION_SERVICE_ADDR: ":9000"
       REDIS_URL: "redis:6379"
+      DATABASE_URL: "postgres://tinyurl:postgrespass@postgres:5432/tinyurl_db?sslmode=disable"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9000"]
       interval: 5s
@@ -72,6 +79,23 @@ services:
     volumes:
       - redis_data:/data
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: tinyurl
+      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_DB: tinyurl_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./shared/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tinyurl -d tinyurl_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -93,3 +117,4 @@ services:
 volumes:
   rabbitmq_data:
   redis_data:
+  postgres_data:
