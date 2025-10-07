@@ -1,0 +1,134 @@
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    depends_on:
+      url-redirection:
+        condition: service_healthy
+      url-shortening:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      API_GATEWAY: ":8080"
+      URL_SHORTENING_URL: "http://url-shortening:8081"
+      URL_REDIRECTION_GRPC_ADDR: "url-redirection:9000"
+      RABBITMQ_URL: "${RABBITMQ_URL}"
+      REDIS_URL: "redis:6379"
+    networks:
+      - backend
+
+  url-shortening:
+    build:
+      context: .
+      dockerfile: url-shortening-service/Dockerfile
+    container_name: url-shortening
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      SHORTENING_SERVICE_ADDR: ":8081"
+      RABBITMQ_URL: ${RABBITMQ_URL}
+      REDIS_URL: "redis:6379"
+      DATABASE_URL: ${DATABASE_URL}
+    networks:
+      - backend
+  
+  url-redirection:
+    build:
+      context: .
+      dockerfile: url-redirection-service/Dockerfile
+    container_name: url-redirection
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      REDIRECTION_SERVICE_ADDR: ":9000"
+      DATABASE_URL: ${DATABASE_URL}
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9000"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - backend
+  
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: app
+    ports:
+      - "80:5173"
+    volumes:
+      - ./app:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+    depends_on:
+      - api-gateway
+    environment:
+      VITE_API_GATEWAY_URL: "http://api-gateway:8080"  # frontend calls gateway internally
+    networks:
+      - backend
+      - frontend
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: tinyurl_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./shared/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d tinyurl_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - backend
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - backend
+
+volumes:
+  rabbitmq_data:
+  redis_data:
+  postgres_data:
+
+networks:
+  backend:
+  frontend:
