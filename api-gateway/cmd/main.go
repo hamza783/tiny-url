@@ -20,7 +20,7 @@ var (
 	urlShorteningServiceURL  = getEnv("URL_SHORTENING_URL", "http://localhost:8081")
 	urlRedirectionServiceURL = getEnv("URL_REDIRECTION_GRPC_ADDR", "localhost:9000")
 	QUEUE_NAME               = "shorten_url_batch"
-	rabbitURL                = getEnv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+	rabbitURL                = getEnv("RABBITMQ_URL", "")
 )
 
 func main() {

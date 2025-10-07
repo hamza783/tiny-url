@@ -21,7 +21,7 @@ var (
 	httpAddr = getEnv("SHORTENING_SERVICE_ADDR", ":8081")
 	// redisAddr   = getEnv("REDIS_URL", "localhost:6379")
 	QUEUE_NAME  = "shorten_url_batch"
-	rabbitURL   = getEnv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+	rabbitURL   = getEnv("RABBITMQ_URL", "")
 	postgresURL = getEnv("DATABASE_URL", "")
 )
 

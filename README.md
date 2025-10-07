@@ -11,11 +11,19 @@ https://github.com/user-attachments/assets/007b4965-0a7c-482c-9b4a-2b3a4656d96f
 ### URL Shortening with multiple URLs
 https://github.com/user-attachments/assets/d085a7e8-2cf5-4298-8fcb-bda311238cab
 
-
+## TODO
+- Add Validation
+- Add caching using redis
 
 ## Setup
 ### If using docker(Simplest):
-This project uses docker to spin up all the microservices, frontend app, rabbitmq, and postgres. To start all the services, simply run this command: `docker compose up --build`. Then navigate to "http://localhost:5173/"
+This project uses docker to spin up all the microservices, frontend app, rabbitmq, and postgres. To start all the services
+
+1. Add a ".env" file to root directory
+2. Copy the contents of ".env.example" file to ".env" file
+3. Update all the urls to your own urls. Docker creates a new container for Postgres and RabbitMQ, so add the user name and password for the default users in your env file. And a default user will be created using those credentials.
+4. Run this command: `docker compose up --build`
+5. Navigate to "http://localhost:5173/"
 
 ### If not using docker, start individual services:
 Make sure you have redis installed locally. Redis is used to store the `short_url` and `long_url` mapping. It is acting as a database for this project.

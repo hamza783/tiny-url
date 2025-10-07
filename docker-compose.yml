@@ -17,6 +17,7 @@ services:
       API_GATEWAY: ":8080"
       URL_SHORTENING_URL: "http://url-shortening:8081"
       URL_REDIRECTION_GRPC_ADDR: "url-redirection:9000"
+      RABBITMQ_URL: "${RABBITMQ_URL}"
       REDIS_URL: "redis:6379"
 
   url-shortening:
@@ -33,8 +34,9 @@ services:
         condition: service_healthy
     environment:
       SHORTENING_SERVICE_ADDR: ":8081"
+      RABBITMQ_URL: ${RABBITMQ_URL}
       REDIS_URL: "redis:6379"
-      DATABASE_URL: "postgres://tinyurl:postgrespass@postgres:5432/tinyurl_db?sslmode=disable"
+      DATABASE_URL: ${DATABASE_URL}
   
   url-redirection:
     build:
@@ -48,8 +50,7 @@ services:
         condition: service_healthy
     environment:
       REDIRECTION_SERVICE_ADDR: ":9000"
-      REDIS_URL: "redis:6379"
-      DATABASE_URL: "postgres://tinyurl:postgrespass@postgres:5432/tinyurl_db?sslmode=disable"
+      DATABASE_URL: ${DATABASE_URL}
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "9000"]
       interval: 5s
@@ -83,8 +84,8 @@ services:
     image: postgres:16-alpine
     container_name: postgres
     environment:
-      POSTGRES_USER: tinyurl
-      POSTGRES_PASSWORD: postgrespass
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: tinyurl_db
     ports:
       - "5432:5432"
@@ -92,7 +93,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./shared/db/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tinyurl -d tinyurl_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d tinyurl_db"]
       interval: 5s
       timeout: 3s
       retries: 5
@@ -109,8 +110,8 @@ services:
       retries: 5
       start_period: 20s
     environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_DEFAULT_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_DEFAULT_PASS}
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
 
