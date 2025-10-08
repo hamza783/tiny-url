@@ -7,14 +7,6 @@ RUN npm install
 
 COPY . .
 
-# Build frontend for production
-RUN npm run build
-
-# Install a lightweight static server
-RUN npm install -g serve
-
-# Expose port that Fly will use
 EXPOSE 5173
 
-# Start the static server
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["npm", "run", "dev"]
