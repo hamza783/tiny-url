@@ -1,7 +1,48 @@
 # tiny-url
 
-This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC/REST to communicate to other microservices. The data is then saved in postgres database. It also uses RabbitMQ and event driven design is used to generate short urls for multiple long urls.
+This is a microservices project to create tiny url. Written in golang. It uses REST api to connect to api gateway which then uses gRPC/REST to communicate to other microservices. The data is then saved in postgres database. It also uses RabbitMQ and event driven design to generate short urls for multiple long urls.
 This is a small project to show implementation of microservices architecture. All the services are saved in 1 repo for easy management.
+
+### Endpoints
+1. POST /api/shorten: used to shorten a long url
+    ```
+    Request: {
+      "long_url": "wwww.example.com"
+    }
+   Response: {
+     "data": {
+       "long_url": "wwww.example.com/dsadad/dsad?user=temp1&type=admin&search=xyz",
+       "short_url": "www.shorturl.com/abcxy"
+     }
+   }
+2. GET /api/{short_url}: used to redirect to the long url given short url
+   ```
+   Response: Redirects to the long url if there is a long url with that short_url. Otherwise returns 404
+     
+3. POST /api/shorten/all: used to shorten multiple long urls provided as a comma separated list. Returns a batch id that could be used to retrieve the short urls related to this request.
+   ```
+   Request: {
+     "long_url_list": "www.examplelongurl1.com,www.examplelongurl2.com,www.examplelongurl3.com"
+   }
+   Response: {
+     "data": {
+       "batch_id": "12345"
+     }
+   }
+4. GET /api/all/{batch_id}: used to get all short/long urls based on the batch id.
+   ```
+   Response: {
+     "data": {
+       "urls_map": [
+         {"short_url": "www.shorturl.com/shortCode1", "long_url": "www.longurlone.com" },
+         {"short_url": "www.shorturl.com/shortCode2", "long_url": "www.longurltwo.com" },
+       ]
+     }
+   }
+
+### High Level Design
+<img width="822" height="666" alt="image" src="https://github.com/user-attachments/assets/22dac876-5118-49b8-aba4-83398152940c" />
+
 
 ## Demo
 
